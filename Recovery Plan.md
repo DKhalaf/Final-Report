@@ -604,17 +604,21 @@ IPsec (Internet Protocol Security) is a framework for a set of protocols for sec
 
 
 Here is one guide:
+
 SRX1
 
 [edit]
+
 fridim@srx-1# edit interfaces
 
 [edit interfaces]
+
 fridim@srx-1# set st0 unit 0 family inet address 192.168.100.1/30
 
 fridim@srx-1# top edit security zones
 
 [edit security zones]
+
 fridim@srx-1# set security-zone untrust interfaces st0.0
 
 fridim@srx-1# set security-zone untrust interfaces st0.0 host-inbound-traffic system-services ike
@@ -622,48 +626,83 @@ fridim@srx-1# set security-zone untrust interfaces st0.0 host-inbound-traffic sy
 fridim@srx-1# top edit security ike
 
 [edit security ike] 
+
 fridim@srx-1# set proposal phase1 authentication-method pre-shared-keys
+
 fridim@srx-1# set proposal phase1 dh-group group2
+
 fridim@srx-1# set proposal phase1 authentication-algorithm md5
+
 fridim@srx-1# set proposal phase1 encryption-algorithm 3des-cbc
+
 fridim@srx-1# set proposal phase1 lifetime-seconds 86400
+
 fridim@srx-1# set policy phase1-policy mode main
+
 fridim@srx-1# set policy phase1-policy proposals phase1
+
 fridim@srx-1# set policy phase1-policy pre-shared-key ascii-text juniper
+
 fridim@srx-1# set gateway phase1-gateway ike-policy phase1-policy
+
 fridim@srx-1# set gateway phase1-gateway address 20.20.20.2
+
 fridim@srx-1# set gateway phase1-gateway dead-peer-detection interval 20
+
 fridim@srx-1# set gateway phase1-gateway dead-peer-detection threshold 5
+
 fridim@srx-1# set gateway phase1-gateway external-interface ge-0/0/0.0
+
 fridim@srx-1# top edit security ipsec
 
 [edit security ipsec]
+
 fridim@srx-1# set proposal phase2 protocol esp
+
 fridim@srx-1# set proposal phase2 authentication-algorithm hmac-md5-96
+
 fridim@srx-1# set proposal phase2 encryption-algorithm 3des-cbc
+
 fridim@srx-1# set proposal phase2 lifetime-seconds 3200
+
 fridim@srx-1# set policy phase2-policy perfect-forward-secrecy keys group2
+
 fridim@srx-1# set policy phase2-policy proposals phase2
+
 fridim@srx-1# set vpn to-remote-SRX bind-interface st0.0
+
 fridim@srx-1# set vpn to-remote-SRX ike gateway phase1-gateway
+
 fridim@srx-1# set vpn to-remote-SRX ike ipsec-policy phase2-policy
+
 fridim@srx-1# set vpn to-remote-SRX establish-tunnels immediately
+
 fridim@srx-1# top edit routing-options
 
 [edit routing-options] 
+
 fridim@srx-1# set static route all next-hop 20.20.20.2
+
 fridim@srx-1# set static route 10.2.2.0/24 next-hop st0.0
+
 fridim@srx-1# top edit security
 
 [edit security] 
+
 fridim@srx-1# set address-book global address network-a 10.1.1.0/24
+
 fridim@srx-1# set address-book global address network-b 10.2.2.0/24
+
 fridim@srx-1# edit policies
 
 [edit security policies] 
+
 fridim@srx-1# set from-zone trust to-zone vpn policy trust-to-vpn match source-address network-a destination-address network-b application any
+
 fridim@srx-1# set from-zone trust to-zone vpn policy trust-to-vpn then permit
+
 fridim@srx-1# set from-zone vpn to-zone trust policy vpn-to-trust match source-address network-b destination-address network-a application any
+
 fridim@srx-1# set from-zone vpn to-zone trust policy vpn-to-trust then permit
 
 
@@ -673,105 +712,63 @@ fridim@srx-1# set from-zone vpn to-zone trust policy vpn-to-trust then permit
 SRX2
 
 [edit]
+
 fridim@srx-2# edit interfaces
 
 [edit interfaces]
-
 fridim@srx-2# set st0 unit 0 family inet address 192.168.100.2/30
-
 fridim@srx-2# top edit security zones
 
 [edit security zones]
-
 fridim@srx-2# set security-zone untrust interfaces st0.0
-
 fridim@srx-2# set security-zone untrust interfaces st0.0 host-inbound-traffic system-services ike
-
 fridim@srx-2# top edit security ike
 
 [edit security ike] 
-
 fridim@srx-2# set proposal phase1 authentication-method pre-shared-keys
-
 fridim@srx-2# set proposal phase1 dh-group group2
-
 fridim@srx-2# set proposal phase1 authentication-algorithm md5
-
 fridim@srx-2# set proposal phase1 encryption-algorithm 3des-cbc
-
 fridim@srx-2# set proposal phase1 lifetime-seconds 86400
-
 fridim@srx-2# set policy phase1-policy mode main
-
 fridim@srx-2# set policy phase1-policy proposals phase1
-
 fridim@srx-2# set policy phase1-policy pre-shared-key ascii-text juniper
-
 fridim@srx-2# set gateway phase1-gateway ike-policy phase1-policy
-
 fridim@srx-2# set gateway phase1-gateway address 20.20.20.1
-
 fridim@srx-2# set gateway phase1-gateway dead-peer-detection interval 20
-
 fridim@srx-2# set gateway phase1-gateway dead-peer-detection threshold 5
-
 fridim@srx-2# set gateway phase1-gateway external-interface ge-0/0/0.0
-
 fridim@srx-2# top edit security ipsec
 
 [edit security ipsec]
-
 fridim@srx-2# set proposal phase2 protocol esp
-
 fridim@srx-2# set proposal phase2 authentication-algorithm hmac-md5-96
-
 fridim@srx-2# set proposal phase2 encryption-algorithm 3des-cbc
-
 fridim@srx-2# set proposal phase2 lifetime-seconds 3200
-
 fridim@srx-2# set policy phase2-policy perfect-forward-secrecy keys group2
-
 fridim@srx-2# set policy phase2-policy proposals phase2
-
 fridim@srx-2# set vpn to-remote-SRX bind-interface st0.0
-
 fridim@srx-2# set vpn to-remote-SRX ike gateway phase1-gateway
-
 fridim@srx-2# set vpn to-remote-SRX ike ipsec-policy phase2-policy
-
 fridim@srx-2# set vpn to-remote-SRX establish-tunnels immediately
-
 fridim@srx-2# top edit routing-options
 
 [edit routing-options] 
-
 fridim@srx-2# set static route all next-hop 20.20.20.1
-
 fridim@srx-2# set static route 10.1.1.0/24 next-hop st0.0
-
 fridim@srx-2# top edit security
 
 [edit security] 
-
 fridim@srx-2# set address-book global address network-a 10.1.1.0/24
-
 fridim@srx-2# set address-book global address network-b 10.2.2.0/24
-
 fridim@srx-2# edit policies
 
 [edit security policies] 
-
 fridim@srx-2# set from-zone trust to-zone vpn policy trust-to-vpn match source-address network-b destination-address network-a 
-
 application any
-
-
 fridim@srx-2# set from-zone trust to-zone vpn policy trust-to-vpn then permit
-
 fridim@srx-2# set from-zone vpn to-zone trust policy vpn-to-trust match source-address network-a destination-address network-b 
-
 application any
-
 fridim@srx-2# set from-zone vpn to-zone trust policy vpn-to-trust then permit
 
 
