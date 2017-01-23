@@ -42,34 +42,6 @@ Rickie Ljungberg: rick0118@edu.eal.dk
 
 Michal Skórczewski: mich74p0@edu.eal.dk
 
-Ali Abed Chayed: @edu.eal.dk
-
-
-
-  
-Table of context
-
-1.	Introduction	2
-2.	Overview	3
-3.	Files which are needed	3
-4.	Layer 3 Diagram	4
-5.	How to create virtual machines	5
-5.1 Vmware booting problems with the routers	9
-6.	Basic configuration of the routers	13
-7.	Installment of the devices	16
-7.1	Client	16
-7.2	WEB server	17
-7.3	DNS server	18
-8.	Configure Debian Webserver	19
-9.	Setting up DHCP	21
-10.	Configure SSH for Servers	21
-11.	Configure the DNS Server with dnsmasq	22
-Sources	25
-12.	What will be included in this document in next version.	25
-13.	Configuring the virtual machines	26
-
-
-
 
  
 1.	Introduction
