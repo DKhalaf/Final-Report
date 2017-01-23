@@ -611,11 +611,14 @@ fridim@srx-1# edit interfaces
 
 [edit interfaces]
 fridim@srx-1# set st0 unit 0 family inet address 192.168.100.1/30
+
 fridim@srx-1# top edit security zones
 
 [edit security zones]
 fridim@srx-1# set security-zone untrust interfaces st0.0
+
 fridim@srx-1# set security-zone untrust interfaces st0.0 host-inbound-traffic system-services ike
+
 fridim@srx-1# top edit security ike
 
 [edit security ike] 
