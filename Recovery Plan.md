@@ -516,3 +516,246 @@ Check your IP address by type the following: ifconfig.
 Than try to ping it inside your browser:
 ![](https://cloud.githubusercontent.com/assets/22467856/22187444/a56f3dba-e106-11e6-8e65-2dce22d74663.png)
 
+
+Set up username and password for your router
+
+At week 51 we were take part with some presentation, and it went well. If you don’t remember how to setup usrname and password here is one small guide:
+1.	Log in to the switch with existing user  or default user (root with no password)  and enter configuration mode:  
+root@switch> configure 
+[edit] 
+root@switch# 
+
+The prompt in brackets ([edit]), also known as a banner, shows that you are in configuration edit mode, at the top of the hierarchy. 
+2.	Change to the [edit system login] section of the configuration:    
+[edit] 
+root@host# edit system login 
+[edit system login] 
+root@switch#  
+
+The prompt in brackets changes to [edit system login] to show you are at a new level in the hierarchy. 
+3.	Now add a new user account:
+[edit system login] 
+root@switch# edit user michael  
+
+This example adds an account michael, but you can use any account name.
+4.	Configure a full name for the account. If the name includes spaces, enclose the entire name in quotation marks ( " " ): 
+[edit system login user michael] 
+root@switch# set full-name "Michael Mike" 
+
+
+5.	Configure an account class. The account class sets the user access privileges for the account. 
+[edit system login user michael] 
+root@switch# set class super-user 
+
+The following access privileges are available for the account 
+operator        permissions [ clear network reset trace view ]
+read-only       permissions [ view ]
+super-user      permissions [ all ]
+unauthorized    permissions [ none ]
+6.	Configure an authentication method and password for the account: 
+[edit system login user michael] 
+root@switch# set authentication plain-text-password 
+New password:
+Retype new password: 
+
+When the new password prompt appears, enter a clear-text password that the system will encrypt, and then confirm the new password.
+7.	Commit the configuration: 
+[edit system login user michael] 
+root@switch# commit 
+commit complete 
+
+Configuration changes are not activated until you commit the configuration. If the commit is successful, a commit complete message appears.
+8.	Return to the top level of the configuration, and then exit:  
+[edit system login user michael] 
+root@switch# top 
+[edit] 
+root@switch# exit 
+Exiting configuration mode 
+9.	Log out of the switch: 
+root@switch> exit 
+% logout Connection closed. 
+
+
+10.	To test your changes, log back in with the user account and password you just configured: 
+login: michael
+Password: <password> 
+--- JUNOS 9.0-R1.1 built 2008-01-15 22:42:19 UTC 
+michael@switch> 
+
+When you log in, you should see the new username at the command prompt.
+
+
+
+
+Moving forward to VPN:
+Back to School we had a meeting and decided to get IPSEC and a VPN connection with our choosed group, which is Group 7. Early stages we tried to do on the internal router, a week later that’s change for the external, that guy makes mach more sense for IPSEC. The following diagram may will give you more clear:
+
+                                        Group 5                                                  Group 7
+![](https://cloud.githubusercontent.com/assets/22467856/22204385/038c7b2c-e172-11e6-9626-7c17faa47ded.png)
+
+
+ 
+
+•	For the first IPSEC: 
+IPsec (Internet Protocol Security) is a framework for a set of protocols for security at the network or packet processing layer of network communication. With other words: IPSEC gives you the protection to sending packages in your VPN connection.
+
+
+
+
+
+Here is one guide:
+SRX1
+[edit]
+fridim@srx-1# edit interfaces
+[edit interfaces]
+fridim@srx-1# set st0 unit 0 family inet address 192.168.100.1/30
+fridim@srx-1# top edit security zones
+[edit security zones]
+fridim@srx-1# set security-zone untrust interfaces st0.0
+fridim@srx-1# set security-zone untrust interfaces st0.0 host-inbound-traffic system-services ike
+fridim@srx-1# top edit security ike
+[edit security ike] 
+fridim@srx-1# set proposal phase1 authentication-method pre-shared-keys
+fridim@srx-1# set proposal phase1 dh-group group2
+fridim@srx-1# set proposal phase1 authentication-algorithm md5
+fridim@srx-1# set proposal phase1 encryption-algorithm 3des-cbc
+fridim@srx-1# set proposal phase1 lifetime-seconds 86400
+fridim@srx-1# set policy phase1-policy mode main
+fridim@srx-1# set policy phase1-policy proposals phase1
+fridim@srx-1# set policy phase1-policy pre-shared-key ascii-text juniper
+fridim@srx-1# set gateway phase1-gateway ike-policy phase1-policy
+fridim@srx-1# set gateway phase1-gateway address 20.20.20.2
+fridim@srx-1# set gateway phase1-gateway dead-peer-detection interval 20
+fridim@srx-1# set gateway phase1-gateway dead-peer-detection threshold 5
+fridim@srx-1# set gateway phase1-gateway external-interface ge-0/0/0.0
+fridim@srx-1# top edit security ipsec
+[edit security ipsec]
+fridim@srx-1# set proposal phase2 protocol esp
+fridim@srx-1# set proposal phase2 authentication-algorithm hmac-md5-96
+fridim@srx-1# set proposal phase2 encryption-algorithm 3des-cbc
+fridim@srx-1# set proposal phase2 lifetime-seconds 3200
+fridim@srx-1# set policy phase2-policy perfect-forward-secrecy keys group2
+fridim@srx-1# set policy phase2-policy proposals phase2
+fridim@srx-1# set vpn to-remote-SRX bind-interface st0.0
+fridim@srx-1# set vpn to-remote-SRX ike gateway phase1-gateway
+fridim@srx-1# set vpn to-remote-SRX ike ipsec-policy phase2-policy
+fridim@srx-1# set vpn to-remote-SRX establish-tunnels immediately
+fridim@srx-1# top edit routing-options
+[edit routing-options] 
+fridim@srx-1# set static route all next-hop 20.20.20.2
+fridim@srx-1# set static route 10.2.2.0/24 next-hop st0.0
+fridim@srx-1# top edit security
+[edit security] 
+fridim@srx-1# set address-book global address network-a 10.1.1.0/24
+fridim@srx-1# set address-book global address network-b 10.2.2.0/24
+fridim@srx-1# edit policies
+[edit security policies] 
+fridim@srx-1# set from-zone trust to-zone vpn policy trust-to-vpn match source-address network-a destination-address network-b application any
+fridim@srx-1# set from-zone trust to-zone vpn policy trust-to-vpn then permit
+fridim@srx-1# set from-zone vpn to-zone trust policy vpn-to-trust match source-address network-b destination-address network-a application any
+fridim@srx-1# set from-zone vpn to-zone trust policy vpn-to-trust then permit
+
+
+
+
+
+SRX2
+[edit]
+fridim@srx-2# edit interfaces
+[edit interfaces]
+fridim@srx-2# set st0 unit 0 family inet address 192.168.100.2/30
+fridim@srx-2# top edit security zones
+[edit security zones]
+fridim@srx-2# set security-zone untrust interfaces st0.0
+fridim@srx-2# set security-zone untrust interfaces st0.0 host-inbound-traffic system-services ike
+fridim@srx-2# top edit security ike
+[edit security ike] 
+fridim@srx-2# set proposal phase1 authentication-method pre-shared-keys
+fridim@srx-2# set proposal phase1 dh-group group2
+fridim@srx-2# set proposal phase1 authentication-algorithm md5
+fridim@srx-2# set proposal phase1 encryption-algorithm 3des-cbc
+fridim@srx-2# set proposal phase1 lifetime-seconds 86400
+fridim@srx-2# set policy phase1-policy mode main
+fridim@srx-2# set policy phase1-policy proposals phase1
+fridim@srx-2# set policy phase1-policy pre-shared-key ascii-text juniper
+fridim@srx-2# set gateway phase1-gateway ike-policy phase1-policy
+fridim@srx-2# set gateway phase1-gateway address 20.20.20.1
+fridim@srx-2# set gateway phase1-gateway dead-peer-detection interval 20
+fridim@srx-2# set gateway phase1-gateway dead-peer-detection threshold 5
+fridim@srx-2# set gateway phase1-gateway external-interface ge-0/0/0.0
+fridim@srx-2# top edit security ipsec
+[edit security ipsec]
+fridim@srx-2# set proposal phase2 protocol esp
+fridim@srx-2# set proposal phase2 authentication-algorithm hmac-md5-96
+fridim@srx-2# set proposal phase2 encryption-algorithm 3des-cbc
+fridim@srx-2# set proposal phase2 lifetime-seconds 3200
+fridim@srx-2# set policy phase2-policy perfect-forward-secrecy keys group2
+fridim@srx-2# set policy phase2-policy proposals phase2
+fridim@srx-2# set vpn to-remote-SRX bind-interface st0.0
+fridim@srx-2# set vpn to-remote-SRX ike gateway phase1-gateway
+fridim@srx-2# set vpn to-remote-SRX ike ipsec-policy phase2-policy
+fridim@srx-2# set vpn to-remote-SRX establish-tunnels immediately
+fridim@srx-2# top edit routing-options
+[edit routing-options] 
+fridim@srx-2# set static route all next-hop 20.20.20.1
+fridim@srx-2# set static route 10.1.1.0/24 next-hop st0.0
+fridim@srx-2# top edit security
+[edit security] 
+fridim@srx-2# set address-book global address network-a 10.1.1.0/24
+fridim@srx-2# set address-book global address network-b 10.2.2.0/24
+fridim@srx-2# edit policies
+[edit security policies] 
+fridim@srx-2# set from-zone trust to-zone vpn policy trust-to-vpn match source-address network-b destination-address network-a application any
+fridim@srx-2# set from-zone trust to-zone vpn policy trust-to-vpn then permit
+fridim@srx-2# set from-zone vpn to-zone trust policy vpn-to-trust match source-address network-a destination-address network-b application any
+fridim@srx-2# set from-zone vpn to-zone trust policy vpn-to-trust then permit
+
+
+
+
+
+
+1.1	Introduction
+The Topology in our project has 2 servers, 2 routers, 1 client, 1 vpn and a guest network. 
+Layer 2:
+![](https://cloud.githubusercontent.com/assets/22467856/22204430/3d045a28-e172-11e6-8301-bd501a283e6c.png) 
+Layer 3:
+![](https://cloud.githubusercontent.com/assets/22467856/22204445/52ef0ff4-e172-11e6-90b9-5ba877d58641.png) 
+
+
+
+1.2	Description of the devices
+2x Juniper vSRX Routers which run Junos V12.1x 47-D15.4 and they must be configured as an internal and an external and each router has 3 interfaces. 
+
+The internal router has 3 interfaces. The ge-0/0/0 is connected to the client, the ge-0/0/1 is connected to the dns server and the ge-0/0/2 is connected to the external router. 
+
+The external router has 3 interfaces. The ge-0/0/0 is connected to the internal router, the ge-0/0/1 is connected to the webserver and the ge-0/0/2 is connected to the vpn tunnel.
+
+The dns server runs Debian (Jessie) it translates the ip’s into names. 
+
+The webserver also runs Debian (Jessie) 
+
+The client runs Ubuntu Desktop 64-bit
+
+The VPN IPsec
+
+1.3	Protocols and Standards
+
+IEEE 802.3: Ethernet standard protocol. A collection of standards which define physical layer and datalink layers mac of Ethernet 
+ 
+SSH: Secure shell is used in tcp/ip computer networks 
+ 
+DHCP: Dynamically distributes network configuration parameters such as ip addresses 
+ 
+DNS: It translates the domain name to an ip address
+ 
+DMZ: Is physical or logical subnet work. The purpose of dmz is to add additional layer of security to lan
+ 
+VPN: It allows the user to create a secure connection to another network over the internet.
+
+1.4	End Result of the project
+
+After configuring each device in our network the client are able to use the internet and also to connect to the guest network and is able to ping every devices in that network. the others groups network. 
+
+
+
